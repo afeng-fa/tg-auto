@@ -1,0 +1,14 @@
+{
+  "qinglong_url": "http://qinglong:5700",
+  "qinglong_client_id": "你的client_id",
+  "qinglong_client_secret": "你的client_secret",
+  "script": "tg-auto-1_发邮件.py",
+  "listeners": [
+    {
+      "name": "私聊监听",
+      "chat_type": "private",
+      "keyword": "",
+      "enabled": true
+    }
+  ]
+}

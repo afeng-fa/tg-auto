@@ -1,0 +1,15 @@
+# 敏感信息
+.env
+config.json
+sessions/
+
+# 日志
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Docker
+*.tar
