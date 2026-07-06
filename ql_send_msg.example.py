@@ -1,33 +1,6 @@
-# Licensed under the MIT License. See LICENSE file in the project root for full license information.
-
-###########################################################################
-#                           免责声明 (DISCLAIMER)                          #
-# ======================================================================= #
-# 1. 用途限制：本代码模板仅用于学习、研究和个人非商业用途，严禁用于以下违规场景：
-#    - 违反Telegram API使用条款的行为（如批量发送消息、批量加群/拉人、刷屏、骚扰用户）；
-#    - 传播违法信息、诈骗、广告营销、侵犯他人隐私等违反法律法规的行为；
-#    - 任何损害Telegram平台或第三方合法权益的行为。
-#
-# 2. 合规要求：使用者必须严格遵守《Telegram API使用条款》(https://core.telegram.org/api/terms)
-#    及使用者所在地的所有法律法规，自行承担合规审查义务。
-#
-# 3. 责任豁免：
-#    - 作者不对本代码模板的功能完整性、稳定性、安全性做任何明示或默示的担保；
-#    - 作者不承担因使用/修改/分发本代码模板导致的任何直接/间接损失，包括但不限于：
-#      Telegram账号封禁、数据泄露、法律纠纷、财产损失、商誉损失等；
-#    - 使用者因违规使用本代码模板产生的一切法律责任、经济赔偿，均由使用者自行承担，
-#      与代码作者无任何关联。
-#
-# 4. 衍生作品：基于本模板开发的衍生作品，其使用风险、合规责任均由衍生作品开发者/使用者承担，
-#    作者不对衍生作品的任何行为负责。
-#
-# 5. 风险提示：Telegram官方有权根据使用条款限制/封禁违规账号，违规使用本模板将导致账号
-#    永久封禁，且可能触发法律追责，使用者需自行评估风险。
-###########################################################################
 import os
 import sys
 import random
-import base64
 import requests
 
 # -----------------------------------------------------------------------------
@@ -42,65 +15,38 @@ import requests
 SEND_MODE = "random"
 
 # 2. 文本池（支持多条，随机选一条发送）
+# 支持换行符 \n
 MESSAGES = [
     "你好，这是一条测试消息",
-    # "第二条消息",
+    # "第二条消息\n第二行",
     # "第三条消息",
 ]
 
-# 3. 图片池（本地路径或 HTTP URL，随机选一张发送）
-#
-# ⚠️ 本地路径说明：脚本会自动读取文件并 base64 编码后通过 API 发送，
-#    无需担心容器间文件系统隔离。
-#    使用本地图片时，需要在 docker-compose.yml 中挂载图片目录：
-#
-#    volumes:
-#      - /host/images:/ql/images:ro    # 只读挂载
-#
-#    然后在下面填写容器内路径：
+# 3. 图片池（TG 容器会从 /app/images 目录读取文件）
+# 只需要填写文件名或任意路径（TG 会自动提取文件名）
 IMAGES = [
-    # "/ql/images/photo1.jpg",
-    # "https://example.com/image2.png",
+    "1.jpg",
+    "2.jpg",
 ]
 
 # 4. 图文组合池（每项是一组文字+图片，随机选一组发送）
+# 支持换行符 \n
 TEXT_IMAGE_PAIRS = [
-    # {"text": "这是图片1的说明", "image": "/ql/images/img1.jpg"},
-    # {"text": "这是图片2的说明", "image": "https://example.com/img2.png"},
+    # {"text": "这是图片1的说明\n换行测试", "image": "1.jpg"},
+    # {"text": "这是图片2的说明", "image": "2.jpg"},
 ]
 
 # 5. 发送目标
 # 支持格式: @username / -100123456 / +8613800000000
 TARGET = "@your_username"
 
-# 6. TG 服务地址
+# 6. TG 服务地址（容器内部通信，一般不需要修改）
 TG_SERVICE_URL = os.getenv("TG_SERVICE_URL", "http://tg-auto-1:8080/api/call")
 
 
 # -----------------------------------------------------------------------------
 # 主逻辑 - 通常不需要修改
 # -----------------------------------------------------------------------------
-
-def is_url(path):
-    return path.startswith("http://") or path.startswith("https://")
-
-
-def encode_file(path):
-    """读取本地文件并 base64 编码"""
-    try:
-        with open(path, "rb") as f:
-            return base64.b64encode(f.read()).decode("utf-8")
-    except Exception as e:
-        print(f"❌ 读取文件失败: {path} - {e}")
-        return None
-
-
-def prepare_file(path_or_url):
-    """准备文件：URL 直接返回，本地文件 base64 编码"""
-    if is_url(path_or_url):
-        return path_or_url
-    return encode_file(path_or_url)
-
 
 def call_api(method, params):
     """调用 TG 服务 API"""
@@ -114,7 +60,6 @@ def call_api(method, params):
                         params["entity"] = int(entity)
                     except ValueError:
                         pass
-
         resp = requests.post(TG_SERVICE_URL, json=payload, timeout=60)
         if resp.status_code == 200:
             result = resp.json()
@@ -140,41 +85,35 @@ def send_text(target, text):
     return call_api("send_message", {"entity": target, "message": text})
 
 
-def send_image(target, image_path):
-    """发送图片"""
-    file_data = prepare_file(image_path)
-    if not file_data:
-        return False
+def send_image(target, image_file):
+    """发送图片（TG 容器会从 /app/images 目录读取）"""
     print(f"🖼️  发送图片 -> {target}")
-    return call_api("send_file", {"entity": target, "file": file_data})
+    return call_api("send_file", {"entity": target, "file": image_file})
 
 
-def send_text_image(target, text, image_path):
+def send_text_image(target, text, image_file):
     """发送图片+文字"""
-    file_data = prepare_file(image_path)
-    if not file_data:
-        return False
     print(f"🖼️+📝 发送图文 -> {target}")
-    return call_api("send_file", {"entity": target, "file": file_data, "caption": text})
+    return call_api("send_file", {"entity": target, "file": image_file, "caption": text})
 
 
 def do_send(target):
     """根据 SEND_MODE 执行发送"""
     if SEND_MODE == "text_only":
         if not MESSAGES:
-            print("❌ MESSAGES 为空，无法发送")
+            print("❌ MESSAGES 为空")
             return False
         return send_text(target, random.choice(MESSAGES))
 
     elif SEND_MODE == "image_only":
         if not IMAGES:
-            print("❌ IMAGES 为空，无法发送")
+            print("❌ IMAGES 为空")
             return False
         return send_image(target, random.choice(IMAGES))
 
     elif SEND_MODE == "text_image":
         if not TEXT_IMAGE_PAIRS:
-            print("❌ TEXT_IMAGE_PAIRS 为空，无法发送")
+            print("❌ TEXT_IMAGE_PAIRS 为空")
             return False
         pair = random.choice(TEXT_IMAGE_PAIRS)
         return send_text_image(target, pair["text"], pair["image"])
@@ -188,38 +127,24 @@ def do_send(target):
         if TEXT_IMAGE_PAIRS:
             choices.append("text_image")
         if not choices:
-            print("❌ 没有可用的内容池，请配置 MESSAGES / IMAGES / TEXT_IMAGE_PAIRS")
+            print("❌ 没有可用内容")
             return False
         mode = random.choice(choices)
         print(f"🎲 随机模式: {mode}")
-        return do_send_with_mode(target, mode)
-
-    else:
-        print(f"❌ 未知的 SEND_MODE: {SEND_MODE}")
-        return False
-
-
-def do_send_with_mode(target, mode):
-    """按指定模式发送"""
-    if mode == "text_only":
-        return send_text(target, random.choice(MESSAGES))
-    elif mode == "image_only":
-        return send_image(target, random.choice(IMAGES))
-    elif mode == "text_image":
-        pair = random.choice(TEXT_IMAGE_PAIRS)
-        return send_text_image(target, pair["text"], pair["image"])
+        if mode == "text_only":
+            return send_text(target, random.choice(MESSAGES))
+        elif mode == "image_only":
+            return send_image(target, random.choice(IMAGES))
+        elif mode == "text_image":
+            pair = random.choice(TEXT_IMAGE_PAIRS)
+            return send_text_image(target, pair["text"], pair["image"])
     return False
 
 
 def main():
     if not TARGET:
-        print("❌ 请配置发送目标 TARGET")
+        print("❌ 请配置 TARGET")
         return
-
-    if SEND_MODE == "random" and not MESSAGES and not IMAGES and not TEXT_IMAGE_PAIRS:
-        print("❌ 请至少配置一个内容池: MESSAGES / IMAGES / TEXT_IMAGE_PAIRS")
-        return
-
     print(f"📋 模式: {SEND_MODE} | 目标: {TARGET}")
     success = do_send(TARGET)
     if success:
