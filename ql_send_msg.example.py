@@ -54,17 +54,17 @@ MESSAGES = [
 #    使用本地图片时，需要在 docker-compose.yml 中挂载图片目录：
 #
 #    volumes:
-#      - /host/images:/ql/images:ro    # 只读挂载
+#      - /host/images:/ql/data/images:ro    # 只读挂载
 #
-#    然后在下面填写容器内路径：
+IMAGE_DIR = "/ql/data/images"
 IMAGES = [
-    # "/ql/images/photo1.jpg",
-    # "https://example.com/image2.png",
+    f"{IMAGE_DIR}/img1.jpg",       # 本地图片
+    "https://example.com/img.png",  # 远程 URL 也支持
 ]
 
 # 4. 图文组合池（每项是一组文字+图片，随机选一组发送）
 TEXT_IMAGE_PAIRS = [
-    # {"text": "这是图片1的说明", "image": "/ql/images/img1.jpg"},
+    # {"text": "这是图片1的说明", "image": f"{IMAGE_DIR}/img1.jpg"},
     # {"text": "这是图片2的说明", "image": "https://example.com/img2.png"},
 ]
 
