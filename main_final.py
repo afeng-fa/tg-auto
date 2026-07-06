@@ -3,6 +3,7 @@ import json
 import logging
 import asyncio
 import aiohttp
+import base64
 from datetime import datetime
 from aiohttp import web
 from telethon import TelegramClient, events, functions, types
@@ -161,6 +162,11 @@ async def update_profile(**kwargs):
 
 async def send_file(entity, file, caption=""):
     try:
+        if isinstance(file, str) and (file.startswith("data:") or len(file) > 200):
+            if file.startswith("data:"):
+                file = base64.b64decode(file.split(",", 1)[1])
+            else:
+                file = base64.b64decode(file)
         await client.send_file(entity, file, caption=caption)
         return "File sent"
     except Exception as e:

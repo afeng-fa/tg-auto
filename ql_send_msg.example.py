@@ -27,7 +27,7 @@
 import os
 import sys
 import random
-import tempfile
+import base64
 import requests
 
 # -----------------------------------------------------------------------------
@@ -50,21 +50,22 @@ MESSAGES = [
 
 # 3. 图片池（本地路径或 HTTP URL，随机选一张发送）
 #
-# ⚠️ 重要：青龙脚本运行在 Docker 容器内，无法直接访问宿主机文件。
+# ⚠️ 本地路径说明：脚本会自动读取文件并 base64 编码后通过 API 发送，
+#    无需担心容器间文件系统隔离。
 #    使用本地图片时，需要在 docker-compose.yml 中挂载图片目录：
 #
 #    volumes:
-#      - /host/images:/ql/data/images:ro    # 只读挂载
+#      - /host/images:/ql/images:ro    # 只读挂载
 #
-IMAGE_DIR = "/ql/data/images"
+#    然后在下面填写容器内路径：
 IMAGES = [
-    f"{IMAGE_DIR}/img1.jpg",       # 本地图片
-    "https://example.com/img.png",  # 远程 URL 也支持
+    # "/ql/images/photo1.jpg",
+    # "https://example.com/image2.png",
 ]
 
 # 4. 图文组合池（每项是一组文字+图片，随机选一组发送）
 TEXT_IMAGE_PAIRS = [
-    # {"text": "这是图片1的说明", "image": f"{IMAGE_DIR}/img1.jpg"},
+    # {"text": "这是图片1的说明", "image": "/ql/images/img1.jpg"},
     # {"text": "这是图片2的说明", "image": "https://example.com/img2.png"},
 ]
 
@@ -84,42 +85,27 @@ def is_url(path):
     return path.startswith("http://") or path.startswith("https://")
 
 
-def download_file(url):
-    """下载远程文件到临时目录，返回本地路径"""
+def encode_file(path):
+    """读取本地文件并 base64 编码"""
     try:
-        resp = requests.get(url, timeout=30)
-        resp.raise_for_status()
-        # 从 URL 或 Content-Type 推断扩展名
-        content_type = resp.headers.get("Content-Type", "")
-        ext = ".jpg"
-        if "png" in content_type:
-            ext = ".png"
-        elif "gif" in content_type:
-            ext = ".gif"
-        elif "webp" in content_type:
-            ext = ".webp"
-
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
-        tmp.write(resp.content)
-        tmp.close()
-        return tmp.name
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
     except Exception as e:
-        print(f"❌ 下载文件失败: {url} - {e}")
+        print(f"❌ 读取文件失败: {path} - {e}")
         return None
 
 
 def prepare_file(path_or_url):
-    """准备文件：如果是 URL 则下载到本地，返回本地路径"""
+    """准备文件：URL 直接返回，本地文件 base64 编码"""
     if is_url(path_or_url):
-        return download_file(path_or_url)
-    return path_or_url
+        return path_or_url
+    return encode_file(path_or_url)
 
 
 def call_api(method, params):
     """调用 TG 服务 API"""
     payload = {"method": method, "params": params}
     try:
-        # target 是纯数字字符串时转为整数
         if "entity" in params:
             entity = params["entity"]
             if isinstance(entity, str):
@@ -156,29 +142,20 @@ def send_text(target, text):
 
 def send_image(target, image_path):
     """发送图片"""
-    local_path = prepare_file(image_path)
-    if not local_path:
+    file_data = prepare_file(image_path)
+    if not file_data:
         return False
-    try:
-        print(f"🖼️  发送图片 -> {target}")
-        return call_api("send_file", {"entity": target, "file": local_path})
-    finally:
-        # 清理下载的临时文件
-        if is_url(image_path) and local_path and os.path.exists(local_path):
-            os.unlink(local_path)
+    print(f"🖼️  发送图片 -> {target}")
+    return call_api("send_file", {"entity": target, "file": file_data})
 
 
 def send_text_image(target, text, image_path):
     """发送图片+文字"""
-    local_path = prepare_file(image_path)
-    if not local_path:
+    file_data = prepare_file(image_path)
+    if not file_data:
         return False
-    try:
-        print(f"🖼️+📝 发送图文 -> {target}")
-        return call_api("send_file", {"entity": target, "file": local_path, "caption": text})
-    finally:
-        if is_url(image_path) and local_path and os.path.exists(local_path):
-            os.unlink(local_path)
+    print(f"🖼️+📝 发送图文 -> {target}")
+    return call_api("send_file", {"entity": target, "file": file_data, "caption": text})
 
 
 def do_send(target):
