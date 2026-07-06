@@ -6,13 +6,16 @@
 
 ```
 tg-auto/
-├── main.py                     # TG 容器主程序
-├── docker-compose.example.yml  # docker-compose 模板
-├── config.example.json         # 配置文件模板
-├── .env.example                # 环境变量模板
-├── create_instance.sh          # 创建新实例脚本
-├── email_script.example.py     # 邮件脚本模板
-└── README.md
+├── main_final.py                 # TG 容器主程序
+├── create_instance.sh            # 创建新实例脚本
+├── docker-compose.example.yml    # docker-compose 模板
+├── config.example.json           # 配置文件模板
+├── .env.example                  # 环境变量模板
+├── qinglong_script.example.py    # 青龙邮件脚本模板
+├── ql_send_msg.example.py        # 青龙 TG 发送脚本模板
+├── Dockerfile                    # Docker 构建文件
+├── .gitignore                    # Git 忽略规则
+└── README.md                     # 项目说明
 ```
 
 ## 工作原理
@@ -53,7 +56,7 @@ cd /opt/docker/telegram-auto-send
    - 记录 `client_id` 和 `client_secret`
 
 2. 上传邮件脚本到青龙
-   - 将 `email_script.example.py` 上传到青龙脚本管理
+   - 将 `qinglong_script.example.py` 上传到青龙脚本管理
    - 重命名为 `tg-auto-1_发邮件.py`
    - 修改 SMTP 配置
 
@@ -89,25 +92,37 @@ cd /opt/docker/telegram-auto-send/inst-1
 sudo docker-compose up -d
 ```
 
-### 5. 首次登录（如需要）
+## 图片发送功能
 
-如果 session 文件不存在，需要交互式登录：
+### 配置步骤
 
-```bash
-sudo docker-compose run --rm tg-service python main.py
+1. **上传图片到 images 目录**
+   ```bash
+   scp /本地图片/* user@your-server:/opt/docker/telegram-auto-send/images/
+   ```
+
+2. **配置青龙脚本**
+   ```python
+   IMAGES = [
+       "/ql/data/images/1.jpg",
+       "/ql/data/images/2.jpg",
+   ]
+   ```
+
+3. **脚本说明**
+   - 支持 `text_only`（纯文字）
+   - 支持 `image_only`（纯图片）
+   - 支持 `text_image`（图文组合）
+   - 支持 `random`（随机选择）
+   - 文字支持换行（使用 `\n`）
+
+### 图片目录挂载
+
 ```
-
-## 多实例部署
-
-```bash
-# 创建新实例
-./create_instance.sh 2    # 创建 inst-2
-./create_instance.sh 3    # 创建 inst-3
-
-# 每个实例需要：
-# 1. 独立的 config.json（不同的青龙凭证）
-# 2. 独立的 session 文件
-# 3. 青龙中独立的脚本和定时任务
+宿主机: /opt/docker/telegram-auto-send/images/
+    ↓
+青龙容器: /ql/data/images/
+TG 容器: /app/images/
 ```
 
 ## 配置说明
@@ -157,11 +172,3 @@ sudo docker restart tg-auto-1 tg-auto-2
 ## License
 
 MIT
-
-## 脚本说明
-
-### email_script.example.py
-TG 监听触发后执行的邮件脚本。上传到青龙，重命名为 `tg-auto-X_发邮件.py`。
-
-### ql_send_msg.example.py
-通过 TG API 发送消息的脚本。用于青龙定时任务向 TG 发送消息。

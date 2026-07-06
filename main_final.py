@@ -162,11 +162,18 @@ async def update_profile(**kwargs):
 
 async def send_file(entity, file, caption=""):
     try:
-        if isinstance(file, str) and (file.startswith("data:") or len(file) > 200):
-            if file.startswith("data:"):
-                file = base64.b64decode(file.split(",", 1)[1])
-            else:
-                file = base64.b64decode(file)
+        IMAGES_DIR = "/app/images"
+        if isinstance(file, str):
+            if file.startswith("http://") or file.startswith("https://"):
+                pass
+            elif not os.path.exists(file):
+                file_path = os.path.join(IMAGES_DIR, file)
+                if os.path.exists(file_path):
+                    file = file_path
+                else:
+                    file_path = os.path.join(IMAGES_DIR, os.path.basename(file))
+                    if os.path.exists(file_path):
+                        file = file_path
         await client.send_file(entity, file, caption=caption)
         return "File sent"
     except Exception as e:
