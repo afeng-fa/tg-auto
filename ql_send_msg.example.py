@@ -49,14 +49,22 @@ MESSAGES = [
 ]
 
 # 3. 图片池（本地路径或 HTTP URL，随机选一张发送）
+#
+# ⚠️ 重要：青龙脚本运行在 Docker 容器内，无法直接访问宿主机文件。
+#    使用本地图片时，需要在 docker-compose.yml 中挂载图片目录：
+#
+#    volumes:
+#      - /host/images:/ql/images:ro    # 只读挂载
+#
+#    然后在下面填写容器内路径：
 IMAGES = [
-    # "/path/to/image1.jpg",
+    # "/ql/images/photo1.jpg",
     # "https://example.com/image2.png",
 ]
 
 # 4. 图文组合池（每项是一组文字+图片，随机选一组发送）
 TEXT_IMAGE_PAIRS = [
-    # {"text": "这是图片1的说明", "image": "/path/to/img1.jpg"},
+    # {"text": "这是图片1的说明", "image": "/ql/images/img1.jpg"},
     # {"text": "这是图片2的说明", "image": "https://example.com/img2.png"},
 ]
 
