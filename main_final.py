@@ -159,7 +159,15 @@ async def update_profile(**kwargs):
         logger.error(f"Error in update_profile: {e}")
         raise e
 
-CUSTOM_METHODS = {"update_profile": update_profile}
+async def send_file(entity, file, caption=""):
+    try:
+        await client.send_file(entity, file, caption=caption)
+        return "File sent"
+    except Exception as e:
+        logger.error(f"Error in send_file: {e}")
+        raise e
+
+CUSTOM_METHODS = {"update_profile": update_profile, "send_file": send_file}
 
 async def handle_call(request):
     try:
