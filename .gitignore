@@ -13,6 +13,3 @@ __pycache__/
 
 # Docker
 *.tar
-
-# MiMoCode
-.mimocode/
