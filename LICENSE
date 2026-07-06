@@ -1,0 +1,88 @@
+MIT License
+
+Copyright (c) 2026 afeng-fa
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================ DISCLAIMER ================================
+
+IMPORTANT NOTICE:
+
+1. Use at Your Own Risk
+   This software is provided as-is without any warranty. The author makes no
+   representations or warranties about the suitability, reliability, stability,
+   or security of this software for any particular purpose.
+
+2. No Liability
+   Under no circumstances shall the author be liable for any damages including
+   but not limited to: system failures, data loss, account suspension/ban,
+   privacy breaches, business interruption, or any indirect, incidental,
+   special, or consequential damages arising from the use of or inability to
+   use this software.
+
+3. API Terms and Compliance
+   This software uses the Telegram API. Users must comply with:
+   - Telegram API Terms of Service (https://core.telegram.org/api/terms)
+   - All applicable laws and regulations in their jurisdiction
+   - The author is not responsible for account suspensions, bans, or any
+     legal consequences resulting from misuse of this software
+
+4. Prohibited Uses
+   Users may NOT use this software for:
+   - Spam, bulk messaging, or harassment
+   - Unauthorized account access or credential theft
+   - Distribution of malware or illegal content
+   - Violation of Telegram's terms of service
+   - Any activity that violates local, national, or international laws
+   
+   The author explicitly disclaims responsibility for any such misuse.
+
+5. Integration Risks
+   This software integrates with QingLong automation platform and third-party
+   services. The author is not responsible for:
+   - Security issues in integrated services
+   - Data leaks or unauthorized access
+   - Service outages or downtime
+   - Compatibility issues with specific QingLong versions
+
+6. Session and Credential Management
+   You are solely responsible for:
+   - Securing Telegram session files
+   - Protecting API credentials and authentication tokens
+   - Preventing unauthorized access to your deployment
+   - Monitoring usage and detecting abuse
+
+7. No Support Guarantee
+   The author provides this software on an as-available basis. There is no
+   guarantee of technical support, bug fixes, security patches, or updates.
+
+8. Modifications and Liability
+   Any modifications to this software are entirely the user's responsibility.
+   The author is not liable for damages caused by modified versions.
+
+By using this software, you explicitly acknowledge that:
+- You have read and understood this disclaimer
+- You accept all risks associated with using this software
+- You are solely responsible for any consequences of your use
+- The author has no liability whatsoever for your use or misuse
+- You comply with all applicable laws, regulations, and API terms
+
+The author reserves the right to modify this disclaimer at any time.
+
+===========================================================================
