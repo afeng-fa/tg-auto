@@ -157,3 +157,11 @@ sudo docker restart tg-auto-1 tg-auto-2
 ## License
 
 MIT
+
+## 脚本说明
+
+### email_script.example.py
+TG 监听触发后执行的邮件脚本。上传到青龙，重命名为 `tg-auto-X_发邮件.py`。
+
+### ql_send_msg.example.py
+通过 TG API 发送消息的脚本。用于青龙定时任务向 TG 发送消息。
